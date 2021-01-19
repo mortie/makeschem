@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mappings.h"
+
 enum tag {
 	TAG_END = 0,
 	TAG_BYTE = 1,
@@ -61,6 +63,28 @@ int nbt_start_named_tag(FILE *f, enum tag tag, const char *str) {
 int nbt_start_list(FILE *f, enum tag tag, int32_t length) {
 	if (!nbt_write_byte(f, tag)) return 0;
 	return nbt_write_int(f, length);
+}
+
+struct mapping *mappings_lookup(const char *name) {
+	size_t start = 0;
+	size_t end = legacy_mappings_len - 1;
+	while (1) {
+		size_t mid = (end - start) / 2 + start;
+		struct mapping *m = &legacy_mappings[mid];
+		int cmp = strcmp(name, m->name);
+		if (cmp > 0) {
+			start = mid;
+		} else if (cmp < 0) {
+			end = mid;
+		} else {
+			return m;
+		}
+
+		if (start >= end) {
+			fprintf(stderr, "nothing found\n");
+			return NULL;
+		}
+	}
 }
 
 #define CHUNK_SIZE 16
@@ -228,17 +252,13 @@ void scdef_read_line(struct blocks *blocks, char *line) {
 	scdef_skip_to_space(line, &idx);
 	line[idx] = '\0';
 
-	uint8_t id = 0;
-	uint8_t data = 0;
-	if (strcmp(name, "torch") == 0) {
-		id = 75;
-		data = 4;
+	struct mapping *m = mappings_lookup(name);
+	if (m == NULL) {
+		fprintf(stderr, "(%zu,%zu,%zu): Unknown block name: '%s'\n", x, y, z, name);
 	} else {
-		fprintf(stderr, "Unknown block name: '%s'\n", name);
+		blocks_set(blocks, x, y, z, m->id, m->data);
+		fprintf(stderr, "(%zu,%zu,%zu): %u:%u\n", x, y, z, m->id, m->data);
 	}
-
-	fprintf(stderr, "(%zu,%zu,%zu): %u:%u\n", x, y, z, id, data);
-	blocks_set(blocks, x, y, z, id, data);
 }
 
 void scdef_read(struct blocks *blocks, FILE *in) {
@@ -318,8 +338,10 @@ int main(int argc, char **argv) {
 		} else {
 			fprintf(stderr, "Error: Write failed.\n");
 		}
+		free(blocks.chunks);
 		return EXIT_FAILURE;
 	}
 
+	free(blocks.chunks);
 	return EXIT_SUCCESS;
 }

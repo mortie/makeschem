@@ -17,10 +17,10 @@ the block.
 Here's an example file:
 
 ```
-0 0 0 torch
-9 0 0 torch
-9 0 9 torch
-0 0 9 torch
+0 0 0 redstone_torch
+9 0 0 redstone_torch
+9 0 9 redstone_torch
+0 0 9 redstone_torch
 ```
 
 All unspecified blocks are set to air. Currently, `torch` is the only supported block,
@@ -28,7 +28,6 @@ and it represents a switched-off redstone torch facing north.
 
 ## TODO
 
-* Read the JSON file used by WorldEdit (`legacy.json`) to map strings to legacy
-  block IDs
+* ~~Read the JSON file used by WorldEdit (`legacy.json`) to map strings to legacy
+  block IDs~~
 * Automatically gzip the resulting schematic
-* Improve the code (remove duplication, etc)
