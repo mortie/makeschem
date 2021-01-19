@@ -8,7 +8,7 @@ schematic file, so you should pass the generated file through gzip.
 
 ## The scdef file format
 
-The schematics definition (`scdef`) file format is a very simple text-based
+The schematics definition file format (`scdef`) is a very simple text-based
 file format, meant to be easy to generate from other tools.
 It's line-based, where each line consists of 3 whitespace-separated numbers,
 followed by a string. The numbers represent x/y/z, and the name represents
@@ -23,8 +23,17 @@ Here's an example file:
 0 0 9 redstone_torch
 ```
 
-All unspecified blocks are set to air. Currently, `torch` is the only supported block,
-and it represents a switched-off redstone torch facing north.
+After generating a schematic from that definition and loading it into a world,
+we see four redstone torches at X/Z coordinates (0,0), (9,0), (9,9) and (0,9):
+
+![Image of schematic](https://raw.githubusercontent.com/mortie/makeschem/main/screenshot.jpg)
+
+All unspecified blocks are set to air.
+
+To see which block names are available, you can look at
+[mappings.c](https://github.com/mortie/makeschem/blob/main/mappings.c).
+The format is `{<block name>, <block ID>, <block metadata>}`, and the file is
+generated from the file [legacy.json](https://github.com/mortie/makeschem/blob/main/mappings.c).
 
 ## TODO
 
